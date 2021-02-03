@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>TinyModia · TinyModia</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TinyModia</span></div><form class="docs-search" action="search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="index.html">Home</a></li><li class="is-active"><a class="tocitem" href="TinyModia.html">TinyModia</a><ul class="internal"><li><a class="tocitem" href="#.1-Equation-oriented-TinyModia-models"><span>2.1 Equation oriented TinyModia models</span></a></li><li><a class="tocitem" href="#.2-Merging-models"><span>2.2 Merging models</span></a></li><li><a class="tocitem" href="#.3-Hierarchical-modeling"><span>2.3 Hierarchical modeling</span></a></li><li><a class="tocitem" href="#.4-Physically-oriented-modeling"><span>2.4 Physically oriented modeling</span></a></li><li class="toplevel"><a class="tocitem" href="#Simulation"><span>3 Simulation</span></a></li><li class="toplevel"><a class="tocitem" href="#Appendix"><span>Appendix</span></a></li><li><a class="tocitem" href="#Named-tuples-and-quoted-expressions"><span>1 Named tuples and quoted expressions</span></a></li><li><a class="tocitem" href="#Mergemodel-algorithm"><span>2 Mergemodel algorithm</span></a></li></ul></li><li><a class="tocitem" href="Functions.html">Functions</a></li><li><a class="tocitem" href="Internal.html">Internal</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href="TinyModia.html">TinyModia</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="TinyModia.html">TinyModia</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com//blob/master/docs/src/TinyModia.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Introduction-to-TinyModia"><a class="docs-heading-anchor" href="#Introduction-to-TinyModia">Introduction to TinyModia</a><a id="Introduction-to-TinyModia-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction-to-TinyModia" title="Permalink"></a></h1><p>In this chapter an equation and object based language called <strong>TinyModia</strong> is defined that is used to evaluate and demonstrate the basic algorithms.</p><h2 id=".1-Equation-oriented-TinyModia-models"><a class="docs-heading-anchor" href="#.1-Equation-oriented-TinyModia-models">2.1 Equation oriented TinyModia models</a><a id=".1-Equation-oriented-TinyModia-models-1"></a><a class="docs-heading-anchor-permalink" href="#.1-Equation-oriented-TinyModia-models" title="Permalink"></a></h2><p>To define models, a constructor <code>Model</code> taking a comma separated list of name/value pairs is used:</p><p>A simple differential equation</p><p class="math-container">\[T \cdot \frac{dx}{dt} + x = 2\]</p><p>can be defined as:</p><pre><code class="language-julia">    using TinyModia
+
+    SimpleModel = Model(
+        T = 0.2,
+        equation = :(T * der(x) + x = 2),
+    )</code></pre><p>The model consist of a definition of a parameter <code>T</code> and one equation. An equation can have a Julia expression on both sides of the equal sign. This model will be symbolically solved for the derivative <code>der(x)</code> before simulation, so the following equation will be used for the integration:</p><p class="math-container">\[\frac{dx}{dt} = (2 - x) / T\]</p><p>A low pass filter block with input <code>u</code> and output <code>y</code></p><p class="math-container">\[\begin{aligned}
+T \cdot \frac{dx}{dt} + x &amp;= u\\
+     y &amp;= x \\
+x(t_0) &amp;= 0
+\end{aligned}\]</p><p>can be defined as:</p><pre><code class="language-julia">    using ModiaBase
+
+    LowPassFilter = Model(
+        T = 0.2,
+        inputs = :[u],
+        outputs = :[y],
+        init = Map(x=0),
+        equation = :[T * der(x) + x = u],
+        y = :x,
+    )</code></pre><p>The <code>init</code> key defines the initial condition of the state <code>x</code> to 0. A constructor <code>Map</code> is used. If an equation has just a unique variable in the left hand side, this variable can be used as a key and the corresponding value is the left hand side of the equation given as a quoted expression <code>y = :x</code>.</p><h2 id=".2-Merging-models"><a class="docs-heading-anchor" href="#.2-Merging-models">2.2 Merging models</a><a id=".2-Merging-models-1"></a><a class="docs-heading-anchor-permalink" href="#.2-Merging-models" title="Permalink"></a></h2><p>It is possible to combine models by merging. If we want to change the model to become a high passfilter, an alternative output equation</p><p class="math-container">\[y = -x + u\]</p><p>is defined in an anonymous Model <code>Model( y = :(-x + u) )</code>. The merging can in this case be made with the Julia <code>merge</code> function:</p><pre><code class="language-julia">HighPassFilter = merge(LowPassFilter, Model( y = :(-x + u) ) )</code></pre><p>In general, also recursive merging is desired and TinyModia provides a <code>mergeModels</code> function for that (see appendix 2). This function can also be invoked as a binary operator <code>|</code> (also used for merge in Python). Note, that the order of the arguments/operands are important.</p><p>Generalizing the block to have two outputs for both low and high pass filtering would be done as follows:</p><pre><code class="language-julia">LowAndHighPassFilter = LowPassFilter | Model(
+        outputs = :[low, high],
+        y = nothing,
+        low = :x,
+        high = :(-x + u)
+    )</code></pre><p>The equation for <code>y</code> is removed by &quot;assigning&quot; <code>nothing</code> and two variables are defined and declared as outputs. Model <code>LowAndHighPassFilter</code> represents the following equations:</p><p class="math-container">\[\begin{aligned}
+T \cdot \frac{dx}{dt} + x &amp;= u\\
+     low &amp;= x \\
+    high &amp;= -x + u \\
+x(t_0) &amp;= 0
+\end{aligned}\]</p><p>By turning on logging of merging <code>setLogMerge(true)</code>, the translator gives the log:</p><pre><code class="language-julia">Changing: outputs = [y] to outputs = [low, high]
+Deleting: y
+Adding: low = x
+Adding: high = -x + u</code></pre><p>The resulting model is pretty printed by calling <code>@showModel(LowAndHighPassFilter)</code>:</p><pre><code class="language-julia">LowAndHighPassFilter = Model(
+  T = 0.2,
+  inputs = [u],
+  outputs = [low, high],
+  init = (
+    x = 0,
+  ),
+  equations = [T * der(x) + x = u],
+  low = x,
+  high = -x + u,
+),</code></pre><p>In order to test such an input/output block, an input needs to be defined. This can be made by adding an equation for <code>u</code>. Assume we want <code>u</code> to be sinousoidial with an increasing frequency:</p><pre><code class="language-julia">using Unitful
+
+TestLowAndHighPassFilter = LowAndHighPassFilter | Model(
+        w = :((time+1u&quot;s&quot;)*u&quot;1/s/s&quot;),
+        u = :(sin(w*time)*u&quot;V&quot;),
+        init = Map(x=0.2u&quot;V&quot;)
+    )</code></pre><p><code>time</code> is a reserved name for the independent variable. It has unit <code>s</code> for seconds. The Julia package <a href="https://painterqubits.github.io/Unitful.jl/stable/">Unitful</a> provides a means for defining units and managing unit inference. Definition of units is done with a string macro <code>u&quot;...&quot;</code>. In this case, the input signal was given unit Volt. The state x must then also have consistent unit, i.e. Volt. If the model equations contain systems of simultaneous equations, then approximate guess values, optionally with units, must be given <code>start</code>: <code>start = Map(i=0.0u&quot;A&quot;)</code>.</p><h2 id=".3-Hierarchical-modeling"><a class="docs-heading-anchor" href="#.3-Hierarchical-modeling">2.3 Hierarchical modeling</a><a id=".3-Hierarchical-modeling-1"></a><a class="docs-heading-anchor-permalink" href="#.3-Hierarchical-modeling" title="Permalink"></a></h2><p>Sofar, the composition of models have resulted in named tuples with values being numeric values or quoted expressions. Hierarchical models are obtained if the values themself are named tuples. A model with two filters can, for example, be defined as follows:</p><pre><code class="language-julia">TwoFilters = (
+    high = HighPassFilter,
+    low = LowPassFilter,
+)</code></pre><p>Note, that the previous definitions of HighPassFilter and LowPassFilter was used instead of making the defintions inline.</p><p>A band pass filter is a series connection of a high pass filter and a low pass filter and is described below:</p><pre><code class="language-julia">BandPassFilter = (
+    inputs = :[u],
+    outputs = :[y],
+    high = HighPassFilter | Map(T=0.5),
+    low = LowPassFilter | Map(T=2.0),
+    equations = :[
+        high.u = u,
+        low.u = high.y,
+        y = low.y]
+)</code></pre><p>A new input have been defined which is propagated to <code>high.u</code>. The series connection itself is obtained by the equation <code>low.u = high.y</code>. Note, that dot-notation is allowed in equations.</p><p>The input and output for the BandPassFilter when using the same input definition as for the TestLowPassFilter is shown below:</p><p><img src="../resources/images/BandPassFilterPlot.png" alt="Band Pass Filter Plot"/></p><p>The above examples are available in file SimpleFilters.jl.</p><h2 id=".4-Physically-oriented-modeling"><a class="docs-heading-anchor" href="#.4-Physically-oriented-modeling">2.4 Physically oriented modeling</a><a id=".4-Physically-oriented-modeling-1"></a><a class="docs-heading-anchor-permalink" href="#.4-Physically-oriented-modeling" title="Permalink"></a></h2><p>Sofar, only signal flow modeling has been used, i.e. input/output blocks coupled with equations between outputs and inputs. For object oriented modeling more high level constructs are neccessary. Coupling is then acausal and involves potentials such as electric potential, positions, pressure, etc. and flows such as electric current, forces and torques and mass flow rate.</p><h3 id=".4.1-Connectors"><a class="docs-heading-anchor" href="#.4.1-Connectors">2.4.1 Connectors</a><a id=".4.1-Connectors-1"></a><a class="docs-heading-anchor-permalink" href="#.4.1-Connectors" title="Permalink"></a></h3><p>Models which contain any flow variable, i.e. included in the list <code>flows</code>, are considered connectors. Connectors must have equal number of flow and potential variables, i.e. included in the list <code>potentials</code>, and have matching array sizes. Connectors may not have any equations. An example of an electrical connector with potential (in Volt) and current (in Ampere) is shown below.</p><pre><code class="language-julia">Pin = Model( potentials = :[v], flows = :[i] )</code></pre><h3 id=".4.2-Components"><a class="docs-heading-anchor" href="#.4.2-Components">2.4.2 Components</a><a id=".4.2-Components-1"></a><a class="docs-heading-anchor-permalink" href="#.4.2-Components" title="Permalink"></a></h3><p>Components are declared in a similar ways as blocks. However, the interfaces between components are defined using connector instances.</p><p>An electrical resistor can be descibed as follows:</p><pre><code class="language-julia">Resistor = Model(
+    R = 1.0u&quot;Ω&quot;,
+    p = Pin,
+    n = Pin,
+    equations = :[
+        0 = p.i + n.i
+        v = p.v - n.v
+        i = p.i
+        R*i = v ]
+    )</code></pre><h3 id=".4.3-Inheritance"><a class="docs-heading-anchor" href="#.4.3-Inheritance">2.4.3 Inheritance</a><a id=".4.3-Inheritance-1"></a><a class="docs-heading-anchor-permalink" href="#.4.3-Inheritance" title="Permalink"></a></h3><p>Various physical components sometimes share common properties. One mechanism to handle this is to use inheritance. In TinyModia, merging is used.</p><p>Electrical components such as resistors, capacitors and inductors are categorized as oneports which have two pins. Common properties are: constraint on currents at the pins and definitions of voltage over the component and current through the component.</p><pre><code class="language-julia">OnePort = Model(
+    p = Pin,
+    n = Pin,
+    equations = :[
+        0 = p.i + n.i
+        v = p.v - n.v
+        i = p.i ] )</code></pre><p>Having such a OnePort definition makes it convenient to define electrical component models by merging OnePort with specific parameter definitions with default values and equations:</p><pre><code class="language-julia">Resistor = OnePort | Model( R = 1.0u&quot;Ω&quot;, equation = :[ R*i = v ], )
+
+Capacitor = OnePort | Model( C = 1.0u&quot;F&quot;, init=Map(v=0.0u&quot;V&quot;), equation = :[ C*der(v) = i ] )
+
+Inductor = OnePort | Model( L = 1.0u&quot;H&quot;, init=Map(i=0.0u&quot;A&quot;), equation = :[ L*der(i) = v ] )
+
+ConstantVoltage = OnePort | Model( V = 1.0u&quot;V&quot;, equation = :[ v = V ] )</code></pre><p>The merged <code>Resistor</code> is shown below:</p><pre><code class="language-julia">Resistor = Model(
+  p = (
+    potentials = [v],
+    flows = [i],
+  ),
+  n = (
+    potentials = [v],
+    flows = [i],
+  ),
+  equations = [v = p.v - n.v; 0 = p.i + n.i; i = p.i],
+  R = 1.0 Ω,
+  equation = [R * i = v],
+),</code></pre><h3 id=".4.4-Connections"><a class="docs-heading-anchor" href="#.4.4-Connections">2.4.4 Connections</a><a id=".4.4-Connections-1"></a><a class="docs-heading-anchor-permalink" href="#.4.4-Connections" title="Permalink"></a></h3><p>Connections are described as an array of tuples listing the connectors that are connected:</p><pre><code class="language-julia">    ( &lt;connect reference 1&gt;, &lt;connect reference 2&gt;, ... )</code></pre><p>A connect reference has either the form &#39;connect instance name&#39; or &#39;component instance name&#39;.&#39;connect instance name&#39; with &#39;connect instance name&#39; being either a connector instance, input or output variable.</p><p>Examples</p><pre><code class="language-julia">    connect = :[
+      (V.p, R1.p)
+      (R1.n, p)
+      (C1.n, V.n, R2.p)
+      ...
+    ]</code></pre><p>For connectors, all the potentials of the connectors in the same connect tuple are set equal and the sum of all incoming flows to the model are set equal to the sum of the flows into sub-components.</p><h3 id=".4.5-Connected-models"><a class="docs-heading-anchor" href="#.4.5-Connected-models">2.4.5 Connected models</a><a id=".4.5-Connected-models-1"></a><a class="docs-heading-anchor-permalink" href="#.4.5-Connected-models" title="Permalink"></a></h3><p>Having the above electrical component models, enables defining a filter</p><p><img src="../resources/images/Filter.png" alt="Filter Circuit"/></p><p>by instanciating components, setting parameters and defining connections.</p><pre><code class="language-julia">Filter = (
+    R = Resistor | Map(R=0.5u&quot;Ω&quot;),
+    C = Capacitor | Map(C=2.0u&quot;F&quot;),
+    V = ConstantVoltage | Map(V=10.0u&quot;V&quot;),
+    connect = :[
+      (V.p, R.p)
+      (R.n, C.p)
+      (C.n, V.n)
+    ]
+)</code></pre><p>The connect tuples are translated to:</p><pre><code class="language-julia">  V.p.v = R.p.v
+  V.p.i + R.p.i = 0
+  R.n.v = C.p.v
+  R.n.i + C.p.i = 0
+  C.n.v = V.n.v
+  C.n.i + V.n.i = 0</code></pre><h3 id=".4.6-Parameter-propagation"><a class="docs-heading-anchor" href="#.4.6-Parameter-propagation">2.4.6 Parameter propagation</a><a id=".4.6-Parameter-propagation-1"></a><a class="docs-heading-anchor-permalink" href="#.4.6-Parameter-propagation" title="Permalink"></a></h3><p>Hierarchical modification of parameters is powerful but sometimes a bit inconvenient. It is also possible to propagate parameters intoduced on a high level down in the hierarchy. The following Filter model defines three parameters, <code>r</code>, <code>c</code> and <code>v</code>. The <code>r</code> parameter is used to set the resistance of the resistor R: <code>Map(R=:(up.r))</code>. A special notation <code>up.</code> is used to denote that <code>r</code> should not be searched within the resistor, but in the enclosing model, i.e. Filter.</p><pre><code class="language-julia">Filter = Model(
+    r = 1.0u&quot;Ω&quot;,
+    c = 1.0u&quot;F&quot;,
+    v = 1.0u&quot;V&quot;,
+    R = Resistor | Map(R=:(up.r)),
+    C = Capacitor | Map(C=:(up.c)),
+    V = ConstantVoltage | Map(V=:(up.v)),
+    connect = :[
+      (V.p, R.p)
+      (R.n, C.p)
+      (C.n, V.n)
+    ]
+)</code></pre><p>Two separate filters can then be defined with:</p><pre><code class="language-julia">TwoFilters = Model( f1 = Filter | Map( r = 10.0, c = 2.0), f2 = Filter )</code></pre><h3 id=".4.7-Redeclarations"><a class="docs-heading-anchor" href="#.4.7-Redeclarations">2.4.7 Redeclarations</a><a id=".4.7-Redeclarations-1"></a><a class="docs-heading-anchor-permalink" href="#.4.7-Redeclarations" title="Permalink"></a></h3><p>It is possible to reuse a particular model topology by redeclaring the model of particular components. For example, changing the filter <code>f1</code> to a voltage divider by changing C from a Capacitor to a Resistor. A predefined model <code>Redeclare</code> is used for this purpose.</p><pre><code class="language-julia">VoltageDividerAndFilter = TwoFilters | Map(f1 = Map(C = Redeclare | Resistor | Map(R = 20.0)))</code></pre><p>By using <code>Redeclare</code>, a new model based on a Resistor is used for <code>C</code> and the usual merge semantics with the previously defined model of <code>C</code> is not used.</p><p>The above examples are available in file FilterCircuit.jl.</p><h1 id="Simulation"><a class="docs-heading-anchor" href="#Simulation">3 Simulation</a><a id="Simulation-1"></a><a class="docs-heading-anchor-permalink" href="#Simulation" title="Permalink"></a></h1><p>A particular model needs to be instantiated and simulated.</p><pre><code class="language-julia">    using ModiaBase
+    using ModiaPlot
+
+    filter = @instantiateModel(Filter)
+    simulate!(filter, stopTime=10.0)
+    plot(filter, &quot;y&quot;, figure=1)</code></pre><p>The <code>@instantiateModel</code> macro takes additional arguments: </p><pre><code class="language-julia">    modelInstance = @instantiateModel(model; modelName=&quot;&quot;, modelModule=nothing, FloatType = Float64, aliasReduction=true, unitless=false,
+        log=false, logModel=false, logDetails=false, logStateSelection=false, logCode=false, logExecution=false, logTiming=false)
+    
+Instantiates a model, i.e. performs structural and symbolic transformations and generates a function for calculation of derivatives suitable for simulation.
+
+* `model`: model (declarations and equations)
+* `FloatType`: Variable type for floating point numbers, for example: Float64, Measurements{Float64}, StaticParticles{Float64,100}, Particles{Float64,2000}
+* `aliasReduction`: Perform alias elimination and remove singularities
+* `unitless`: Remove units (useful while debugging models and needed for MonteCarloMeasurements)
+* `log`: Log the different phases of translation
+* `logModel`: Log the variables and equations of the model
+* `logDetails`: Log internal data during the different phases of translation
+* `logStateSelection`: Log details during state selection
+* `logCode`: Log the generated code
+* `logExecution`: Log the execution of the generated code (useful for finding unit bugs)
+* `logTiming`: Log timing of different phases
+* `return modelInstance prepared for simulation` </code></pre><p>The simulation is performed with <a href="https://github.com/SciML/DifferentialEquations.jl">DifferentialEquations.jl</a> using the default integrator that this package automatically selects. The simulation result is stored inside the <code>filter</code> object and can be plotted with <code>ModiaPlot.plot</code>.</p><p>It is also possible to specify the integrator as second argument of <code>simulate!</code>:</p><pre><code class="language-julia">    using ModiaBase
+    using DifferentialEquations
+    using ModiaPlot
+
+    filter = @instantiateModel(Filter)
+    simulate!(filter, Tsit5(), stopTime=10.0)
+    plot(filter, [&quot;y&quot;, &quot;x&quot;], figure=1)</code></pre><p>Integrator <code>DifferentialEquations.Tsit5</code> is an adaptive Runge-Kutta method of order 5/4.</p><p>For more information, see the documentation of <a href="Functions.html#TinyModia.simulate!"><code>simulate!</code></a> and the documentation of the <a href="https://modiasim.github.io/ModiaPlot.jl/stable/">ModiaPlot</a> package.</p><h1 id="Appendix"><a class="docs-heading-anchor" href="#Appendix">Appendix</a><a id="Appendix-1"></a><a class="docs-heading-anchor-permalink" href="#Appendix" title="Permalink"></a></h1><h2 id="Named-tuples-and-quoted-expressions"><a class="docs-heading-anchor" href="#Named-tuples-and-quoted-expressions">1 Named tuples and quoted expressions</a><a id="Named-tuples-and-quoted-expressions-1"></a><a class="docs-heading-anchor-permalink" href="#Named-tuples-and-quoted-expressions" title="Permalink"></a></h2><p>The fundamental mechanism for defining models in TinyModia are named tuples which is a list of key/value pairs enclosed in parentheses:</p><pre><code class="language-julia">julia&gt; S=(p=5, q=10)
+(p = 5, q = 10)
+
+julia&gt; typeof(S)
+NamedTuple{(:p, :q),Tuple{Int64,Int64}}</code></pre><p>Named tuples are conceptually similar to dictionaries (Dict), but the constructor syntax is simpler. Note that if only one key/value pair is given, a comma must preceed the final parentheses: <code>(p = 5, )</code>. It is also possible to define named tuples using a keyword argument list, i.e. a list starting with a semi-colon: <code>z=(;p=5)</code>.</p><p>The values can also be a quoted expression, i.e. an expression enclosed in <code>:( )</code>, an array of quoted expressions encloded in <code>:[ ]</code> or just a quoted symbol, <code>:x</code>. This mechanism is used to encode equations and expressions of the model which needs to be manipulated before the model can be simulated.</p><p>Julia defines a very useful merge operation between named tuples (and dictionaries):</p><pre><code class="language-julia">julia&gt; T=(q=100, r=200)
+(q = 100, r = 200)
+
+julia&gt; merge(S, T)
+(p = 5, q = 100, r = 200)</code></pre><p>If a key already exists <code>q</code> in the first named tuple, it&#39;s value is overwritten otherwise it&#39;s added, <code>r</code>. Such a merge semantics allows for unification of parameter modifications and inheritance as will be demonstrated below.</p><h2 id="Mergemodel-algorithm"><a class="docs-heading-anchor" href="#Mergemodel-algorithm">2 Mergemodel algorithm</a><a id="Mergemodel-algorithm-1"></a><a class="docs-heading-anchor-permalink" href="#Mergemodel-algorithm" title="Permalink"></a></h2><p>The <code>mergeModel</code> algorithm is defined as follows (without logging):</p><pre><code class="language-julia">function mergeModels(m1::NamedTuple, m2::NamedTuple, env=Symbol())
+    mergedModels = OrderedDict{Symbol,Any}(pairs(m1)) # Convert the named tuple m1 to an OrderedDict
+    for (k,v) in collect(pairs(m2))
+        if typeof(v) &lt;: NamedTuple
+            if k in keys(mergedModels) &amp;&amp; ! (:_redeclare in keys(v))
+                mergedModels[k] = mergeModels(mergedModels[k], v, k)
+            else
+                mergedModels[k] = v
+            end
+        elseif v === nothing
+            delete!(mergedModels, k)
+        else
+            mergedModels[k] = v
+        end
+    end
+    return (; mergedModels...) # Transform OrderedDict to named tuple
+end
+
+|(m::NamedTuple, n::NamedTuple) =  mergeModels(m, n)
+
+Redeclare = ( _redeclare = true, )</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Home</a><a class="docs-footer-nextpage" href="Functions.html">Functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 3 February 2021 17:15">Wednesday 3 February 2021</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
