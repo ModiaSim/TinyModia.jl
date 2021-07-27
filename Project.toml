@@ -22,7 +22,7 @@ TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
-DifferentialEquations = "6.17, 6.16"
+DifferentialEquations = "6.18, 6.17, 6.16"
 FiniteDiff = "2.8, 2.7, 2.6, 2.5"
 ForwardDiff = "0.10"
 JSON = "0.21"
