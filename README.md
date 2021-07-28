@@ -1,6 +1,7 @@
 > ⚠️ **INFO: This repository is deprecated**
 > 
 > Do no longer use this repository. Use instead [Modia.jl](https://github.com/ModiaSim/Modia.jl).
+> For more details, see [ModiaSim](https://modiasim.github.io/docs/). 
 
 
 # TinyModia
