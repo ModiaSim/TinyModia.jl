@@ -1,3 +1,10 @@
+> ⚠️ **INFO: This repository is deprecated**
+> 
+> Do no longer use this repository. Use instead [Modia.jl](https://github.com/ModiaSim/Modia.jl).
+
+<span style="color:grey">
+
+
 # TinyModia
  
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://modiasim.github.io/TinyModia.jl/stable/index.html)
@@ -32,3 +39,5 @@ julia> ]add ModiaPlot, Unitful, DifferentialEquations, Measurements, MonteCarloM
   [DLR - Institute of System Dynamics and Control](https://www.dlr.de/sr/en).
 
 License: MIT (expat)
+
+</span>
