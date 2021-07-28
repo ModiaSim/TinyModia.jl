@@ -2,8 +2,6 @@
 > 
 > Do no longer use this repository. Use instead [Modia.jl](https://github.com/ModiaSim/Modia.jl).
 
-<span style="color:grey">
-
 
 # TinyModia
  
@@ -39,5 +37,3 @@ julia> ]add ModiaPlot, Unitful, DifferentialEquations, Measurements, MonteCarloM
   [DLR - Institute of System Dynamics and Control](https://www.dlr.de/sr/en).
 
 License: MIT (expat)
-
-</span>
